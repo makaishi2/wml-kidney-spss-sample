@@ -1,0 +1,246 @@
+<html>
+<head>
+<style> 
+  div.tooltip { 
+    position: absolute; 
+    text-align: center; 
+    width: 80px; 
+    height: 15px; 
+    padding: 2px; 
+    font: 14px sans-serif; 
+    background: lightsteelblue; 
+    border: 0px; 
+    border-radius: 8px; 
+    pointer-events: none; 
+  } 
+</style>
+
+{% extends "layout.html" %}
+{% block body %}
+</head>
+<body>
+<h2>慢性腎疾患判定モデル　サンプルアプリ</h2>
+<hr>
+<div>
+<label  for="class_id">正解データ:　　　</label>
+<input type="text" name="class_id" disabled="disabled" id="class_id" />
+<br>
+<label  for="age_id">年齢:　　　　　　</label>
+<input type="text" name="age_id" id="age_id" />
+<br>
+<label  for="bp_id">血圧:　　　　　　</label>
+<input type="text" name="bp_id" id="bp_id" />
+<br>
+<label  for="al_id">アルブミン:　　　</label>
+<input type="text" name="al_id" id="al_id" />
+<br>
+<label  for="sc_id">クレアチニン:　　</label>
+<input type="text" name="sc_id" id="sc_id" />
+<br>
+<label for="pot_id">カリウム:　　　　</label>
+<input type="text" name="pot_id" id="pot_id" />
+<br>
+<label for="pcv_id">ヘマトクリット値:</label>
+<input type="text" name="pcv_id" id="pcv_id" />
+<br>
+<input type="button" name="next" value="次データ" id="next"/>
+<input type="button" name="prev" value="前データ" id="prev"/>
+<br>
+<br>
+<input type="button" name="button" value="分析開始" id="predict"/>
+<hr>
+<br>
+予測結果<br>
+<label id="result"></label>
+<br>
+<svg width="800" height="200"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var data_list = [
+["ckd",61,90,0,,,],
+["notckd",75,70,0,0.8,3.5,46],
+["notckd",57,60,0,1.2,4.7,44],
+["ckd",47,70,2,2.2,4.1,],
+["ckd",21,90,4,1.7,3.5,23],
+["ckd",30,70,0,6.5,4.3,],
+["ckd",15,60,3,0.6,4.0,33],
+["notckd",45,80,0,0.6,4.4,46],
+["ckd",51,100,2,1.6,4.5,],
+["notckd",44,70,,0.9,3.6,50],
+["notckd",52,80,0,1.2,4.6,43],
+["ckd",4,,1,0.6,4.4,34],
+["ckd",76,70,2,10.2,,36],
+["notckd",43,80,0,1.1,3.9,42],
+["ckd",65,90,4,13.5,6.3,31],
+["notckd",50,80,0,0.6,4.5,48],
+["ckd",62,70,3,1.7,4.7,39],
+["notckd",35,80,0,1.2,5.0,45],
+["ckd",65,70,2,3.3,,37],
+["ckd",54,100,3,1.6,4.4,33]
+];
+
+var_index = 0;
+data_length = data_list.length;
+var data = data_list[var_index];
+
+function set_params(var_index) {
+    var item = data_list[var_index];
+    var answer;
+    if (item[0] === "ckd" ) {
+        answer = "慢性腎疾患あり";
+    } else {
+        answer = "慢性腎疾患なし";
+    }
+    $('#class_id').val(answer);
+    $('#age_id').val(item[1]);
+    $('#bp_id').val(item[2]);
+    $('#al_id').val(item[3]);
+    $('#sc_id').val(item[4]);
+    $('#pot_id').val(item[5]);
+    $('#pcv_id').val(item[6]);
+}
+
+set_params(0);
+
+var svg = d3.select("svg"),
+margin = {top: 20, right: 20, bottom: 30, left: 80},
+width = +svg.attr("width") - margin.left - margin.right,
+height = +svg.attr("height") - margin.top - margin.bottom;
+var x = d3.scaleLinear().range([0, width]);
+var y = d3.scaleBand().range([height, 0]);
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+function draw_graph(ds) {
+    
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    x.domain([0, 1.0]);
+    y.domain(ds.map(function(d) { return d.name; })).padding(0.1);
+
+    g.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).ticks(5).tickFormat(function(d) { return d; }).tickSizeInner([-height]));
+
+    g.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(y));
+
+    g.selectAll(".bar")
+        .data(ds)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", 0)
+        .attr("height", y.bandwidth())
+        .attr("y", function(d) { return y(d.name); })
+        .attr("width", function(d) { return x(d.value); })
+        .attr("fill", "steelblue")
+
+        .on("mouseover", function(d) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(d.name + ": " + d.value.toFixed(3))
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+}
+</script>
+
+</body>
+</html>
+
+<script>
+
+$(function(){
+    $('#predict').click(predict) 
+});
+
+$(function(){
+    $('#prev').click(prev) 
+});
+
+
+$(function(){
+    $('#next').click(next) 
+});
+
+function next() {
+    console.log("next");
+    var_index = ( var_index +1 ) % data_length;
+    set_params(var_index);
+}
+
+function prev() {
+    console.log("prev");
+    var_index = ( data_length + var_index -1 ) % data_length;
+    set_params(var_index);
+}
+
+var cat_list = [
+ '慢性腎疾患なし',
+ '慢性腎疾患あり'
+];
+
+function call_flask( type, url, error ) {
+    var elem =  document.getElementById("result");
+    elem.innerHTML = '';
+    svg.selectAll("g").remove()
+    $("#send").prop("disabled", true);
+    data1 = {
+        "AGE": parseInt($('#age_id').val()),
+        "BP":  parseInt($('#bp_id').val()),
+        "AL":  parseInt($('#al_id').val()),
+        "SC":  parseFloat($('#sc_id').val()),
+        "POT":  parseFloat($('#pot_id').val()),
+        "PCV":  parseInt($('#pcv_id').val())
+    };
+    console.log(data1);
+    json1 = JSON.stringify(data1);
+    $.ajax({
+        type: "POST",
+        url: "/predict",
+        dataType: "json",
+        data: json1,
+        processData: false,
+        contentType: "application/json",
+        cache: false,
+        timeout: 600000,
+        success: function (data2) {
+            console.log('predict callback');
+            keys = Object.keys(data2);
+            ds = [];
+            max = 0.0;
+            max_key = "";
+            for ( var key of keys ) {
+                console.log(key);
+                var value = data2[key];
+                ds.push({'name': key, 'value': value});
+                if ( max < value ) {
+                    max = value;
+                    max_key = key;
+                }
+            }
+            console.log(ds);
+            draw_graph(ds);
+            $('#result').text(max_key);
+        }
+    });
+}
+
+function predict() {
+    call_flask( 'GET', '/predict', 
+            function(XMLHttpRequest,textStatus,errorThrown){alert('error');} );
+}
+
+</script>
+
+{% endblock %}
