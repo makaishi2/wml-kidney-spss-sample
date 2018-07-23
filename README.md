@@ -99,16 +99,18 @@ $ cf a
 * 認証情報の確認  
 BluemixダッシュボードからWMLサービスの管理画面を開き、接続用の認証情報を調べてテキストエディタなどにコピーします。
 * .envファイルの設定  
-次のコマンドで.env.exampleファイルの雛形から.envをコピーし、エディタで調べたusername, passwordを設定します。
+次のコマンドで.env.exampleファイルの雛形から.envをコピーし、エディタで調べたu認証情報とSCORING_URLを設定します。
 
 ```sh
 $ cp .env.example .env
 ```
 
 ```sh
-WML_SERVICE_CREDENTIALS_URL=xxxxx
-WML_SERVICE_CREDENTIALS_USERNAME=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-WML_SERVICE_CREDENTIALS_PASSWORD=xxxxxxxxxxxx
+WML_URL="https://ibm-watson-ml.mybluemix.net"
+WML_USERNAME="xxxx"
+WML_PASSWORD="xxxx"
+WML_INSTANCE_ID="xxxx"
+SCORING_URL="xxxx"
 ```
 
 * Pythonアプリケーションの導入、実行  
