@@ -73,7 +73,7 @@ $ ibmcloud service list
 (例) **wml-kidney-spss-aka7**
 
 ```
-$ cf push <service_name>
+$ ibmcloud app push <service_name>
 ```
 
 ## サービスのバインド・環境変数の設定
