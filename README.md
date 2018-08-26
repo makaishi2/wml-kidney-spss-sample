@@ -96,20 +96,6 @@ $ ibmcloud app restage <APP_NAME>
 $ ibmcloud service list
 ```
 
-
-
-## サービスのバインド、環境変数の設定
-
-以下のコマンドで、Watson MLのサービスとのバインド及び、WebサービスエンドポイントURLの設定を行います。
-エンドポイントURLの取得方法については、[SPSSクラウド版で簡単機械学習](https://qiita.com/makaishi2/items/85d7694168e71ee3c094)を参考にして下さい。  
-最後のコマンドの実行には数分かかります。  
-
-```
-$ cf bs <service_name> <ml_name>
-$ cf se <service_name> SCORING_URL <scoring_url>
-$ cf rg <service_name>
-```
-
 ## アプリケーションのURLと起動
 
 デプロイが正常に完了したらアプリケーションを起動できます。  
